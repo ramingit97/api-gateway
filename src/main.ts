@@ -32,7 +32,10 @@ async function bootstrap() {
     rmqService.getOptions('response_queue')
   );
   
-  await app.listen(3000);
+  await app.listen(3000,()=>{
+    console.log("API GATEWAY RUN ON PORT 3000");
+    
+  });
   await appRmq.listen();
 }
 bootstrap();

@@ -6,7 +6,7 @@ import { Authorization } from 'src/decorators/authorization.decorator';
 export class OrdersController {
 
     constructor(
-        @Inject("ORDER_SERVICE_TCP") private readonly orderService:ClientProxy,
+        // @Inject("ORDER_SERVICE_TCP") private readonly orderService:ClientProxy,
         @Inject("AUTH_SERVICE") private readonly authService:ClientProxy,
 
     ){
@@ -20,9 +20,9 @@ export class OrdersController {
             ...orderData,
             userId:request.user.id
         }
-        let result = await firstValueFrom(this.orderService.send("create",data))
-        console.log("12312312321",result);
-        return result;
+        // let result = await firstValueFrom(this.orderService.send("create",data))
+        // console.log("12312312321",result);
+        // return result;
     }
 
 
@@ -38,27 +38,27 @@ export class OrdersController {
         //     )
         // );
 
-        let result = await this.orderService.send("list", { limit: 10 }).pipe(
-            switchMap(posts => {
-                // console.log(posts);
-                const userIds = Array.from(new Set(posts.map(post => post.userId)));
-                return from(this.authService.send("all", userIds)).pipe(
-                    map(users => {
-                         const usersMap = users.flat().reduce((acc, user) => {
-                            acc[user.id] = user;
-                            return acc;
-                        }, {});
-                        const postsWithAuthors = posts.map(post => ({
-                            ...post,
-                            author: usersMap[post.userId]
-                        }));
-                        return postsWithAuthors;
-                    })
-                );
-            }),
-        ); // Преобразуем в Promise для использования await
+        // let result = await this.orderService.send("list", { limit: 10 }).pipe(
+        //     switchMap(posts => {
+        //         // console.log(posts);
+        //         const userIds = Array.from(new Set(posts.map(post => post.userId)));
+        //         return from(this.authService.send("all", userIds)).pipe(
+        //             map(users => {
+        //                  const usersMap = users.flat().reduce((acc, user) => {
+        //                     acc[user.id] = user;
+        //                     return acc;
+        //                 }, {});
+        //                 const postsWithAuthors = posts.map(post => ({
+        //                     ...post,
+        //                     author: usersMap[post.userId]
+        //                 }));
+        //                 return postsWithAuthors;
+        //             })
+        //         );
+        //     }),
+        // ); // Преобразуем в Promise для использования await
 
-        return result;
+        // return result;
     }
 
     // @Get("deleteAll")

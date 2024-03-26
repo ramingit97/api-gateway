@@ -15,14 +15,14 @@ import { AuthGuard } from 'src/services/guards/authorization.guard';
                   port:4000
                 },
               },
-            {
-              name: 'ORDER_SERVICE_TCP',
-              transport: Transport.TCP,
-              options: {
-                host:'order-service',
-                port:6000
-              },
-            },
+            // {
+            //   name: 'ORDER_SERVICE_TCP',
+            //   transport: Transport.TCP,
+            //   options: {
+            //     host:'order-service',
+            //     port:6000
+            //   },
+            // },
         ])
     ],
     controllers:[OrdersController],
