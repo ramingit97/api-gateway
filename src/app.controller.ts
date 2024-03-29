@@ -6,18 +6,22 @@ import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { log } from 'console';
 import {readFileSync} from 'fs';
+import { randomUUID } from 'crypto';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService,
     @Inject("POST_SERVICE_TCP") private readonly postService:ClientProxy,
     @Inject("AUTH_SERVICE") private readonly authService:ClientProxy,
+    @Inject("AUTH_SERVICE_KAFKA") private readonly authServiceKafka:ClientProxy,
     @Inject("POST_SERVICE") private readonly postRmqService:ClientProxy,
     // @Inject("ORDER_SERVICE_TCP") private readonly orderService:ClientProxy,
     @Inject("ORDER_SERVICE") private readonly orderRmqService:ClientProxy,
     @Inject("NODE_SERVICE_TCP") private readonly nodeService:ClientProxy,
     private readonly httpService: HttpService,
-    @Inject("POST_SERVICE_TCP2") private readonly postService2:ClientProxy,
+    @Inject("POST_SERVICE2") private readonly postService2:ClientProxy,
+    @Inject("POST_SERVICE_TCP2") private readonly postService4:ClientProxy,
+    
     ) {}
 
   @Get()
@@ -95,12 +99,28 @@ export class AppController {
   @Get("notifications3")
   async getNotifications3(){
     let orderRes = await lastValueFrom(
-      this.orderRmqService.emit("deleteAll",{key:'deleteall',
-      topic:'orders',
-      value:{
-        order:1,name:"123123",description:"new description"
-      }})
+      this.postService2.emit("posts",{key:'create.post',
+        topic:'posts',
+        value:{
+          name:"123123",description:randomUUID()
+        }}) 
     )
+
+    console.log(orderRes);
+
+    
+  }
+
+  @Get("notifications4")
+  async getNotifications4(){
+    console.log("1312312312312111");
+    
+    let res = await firstValueFrom(this.postService4.send("create_post1",{
+      name:"Ramin",
+      description:"description"
+     }))
+     console.log(res,"esrereer");
+     
 
     
   }
@@ -131,12 +151,21 @@ export class AppController {
 
   @Get("post_service2")
   async postService3(){
-    let res = await lastValueFrom(
-      this.postService2.send("all2",{ramin:"ramin"})
-    )
+    console.log('get.user.info111');
+      
+    // this.authServiceKafka.emit("get.user.info",{
+    //   key:'create',
+    //   topic:'get.user.info',
+    //   headers:{eventType:"orders.create"},
+    //   value:1});
+    // let res = await lastValueFrom(
+    //   this.postService2.send("all2",{ramin:"ramin"})
+    // )
 
-    console.log('121212',res);
-    return res;
+    // console.log('121212',res);
+    // return res;
+
+
     // let orderRes = await lastValueFrom(
     //   this.orderRmqService.emit("create_order",{order:1,name:"123123",description:"new description"})
     // )

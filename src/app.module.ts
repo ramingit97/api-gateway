@@ -24,6 +24,19 @@ import { Kafka } from 'kafkajs';
           port:4000
         },
       },
+      {
+        name: 'AUTH_SERVICE_KAFKA',
+        transport: Transport.KAFKA,
+          options: {
+            client: {
+              clientId: 'auth-consumer',
+              brokers: ['kafka-0:9092','kafka-1:9092'],
+            },
+            consumer: {
+              groupId: 'auth-consumer',
+            },
+          },
+      },
       // {
       //   name: 'POST_SERVICE',
       //   transport: Transport.RMQ,
@@ -46,7 +59,7 @@ import { Kafka } from 'kafkajs';
               groupId: 'consumer-post',
             },
           },
-        },
+      },
       {
         name: 'POST_SERVICE_TCP',
         transport: Transport.TCP,
@@ -89,12 +102,15 @@ import { Kafka } from 'kafkajs';
 
       {
         name: 'POST_SERVICE2',
-        transport: Transport.RMQ,
+        transport: Transport.KAFKA,
         options: {
-          urls: ['amqp://rabbitmq:5672'],
-          queue: 'post_queue2',
-          noAck:true,
-          queueOptions: { durable: true },
+          client: {
+            clientId: 'consumer-post2',
+            brokers: ['kafka-0:9092','kafka-1:9092'],
+          },
+          consumer: {
+            groupId: 'consumer-post2',
+          },
         },
       },
       {

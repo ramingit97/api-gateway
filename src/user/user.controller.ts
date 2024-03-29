@@ -19,6 +19,7 @@ export class UserController {
 
     @Post("register")
     async register(@Body() userData,@Res() res:Response){
+        console.log("121212");
         let result = await firstValueFrom(this.authService.send("register",userData))
           console.log('result',result);
           return result;
