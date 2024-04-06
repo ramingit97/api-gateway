@@ -184,6 +184,23 @@ export class AppController {
     //   console.log('123123123');
     // }
 
+
+
+  @Post('create_product')
+  async createProduct(){
+    console.log("api gateway product");
+    
+     let res = await firstValueFrom(this.postService.send("create.product",{
+      name:"Ramin",
+      description:"description"
+     }))
+
+    //  console.log(res.gotFerid);
+     
+     return res;
+  }
+
+
     @Get("home")
     async getHome(){
       try {

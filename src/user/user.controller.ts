@@ -19,9 +19,9 @@ export class UserController {
 
     @Post("register")
     async register(@Body() userData,@Res() res:Response){
-        console.log("121212");
+        console.log("userData api gateway11",userData);
         let result = await firstValueFrom(this.authService.send("register",userData))
-          console.log('result',result);
+          console.log('22222',result);
           return result;
         // let result = await this.userService.register(userData);
         // 
@@ -35,7 +35,7 @@ export class UserController {
     @Post("login")
     async login(@Body() userData,@Res() res:Response){
 
-        console.log('fff2323');
+        console.log('22222  ',userData);
         
         let result = await firstValueFrom(this.authService.send("login",userData))
         

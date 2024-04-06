@@ -2,30 +2,30 @@ import { Body, Controller, Get,Inject, Post, Request} from '@nestjs/common';
 import { ClientProxy} from '@nestjs/microservices';
 import { firstValueFrom, from, of, switchMap,map } from 'rxjs';
 import { Authorization } from 'src/decorators/authorization.decorator';
+import { CreateOrderSaga } from 'src/usecases/create-order/create-order.saga';
 @Controller('orders')
 export class OrdersController {
 
     constructor(
-        // @Inject("ORDER_SERVICE_TCP") private readonly orderService:ClientProxy,
+        @Inject("ORDER_SERVICE_TCP") private readonly orderService:ClientProxy,
         @Inject("AUTH_SERVICE") private readonly authService:ClientProxy,
+        @Inject('create-order-saga') private saga: CreateOrderSaga
 
     ){
         
     }
 
-    @Authorization(true)
+    // @Authorization(true)
     @Post("create")
-    async getMe(@Body() orderData,@Request() request){
-        let data = {
-            ...orderData,
-            userId:request.user.id
-        }
+    async create(@Body() orderData,@Request() request){
+        orderData.id = 1;
         // let result = await firstValueFrom(this.orderService.send("create",data))
         // console.log("12312312321",result);
         // return result;
+        await this.saga.execute(orderData);
     }
 
-
+    // @Authorization(true)
     @Get("list")
     async get(@Body() userData){
         // const result = await firstValueFrom(
@@ -38,7 +38,7 @@ export class OrdersController {
         //     )
         // );
 
-        // let result = await this.orderService.send("list", { limit: 10 }).pipe(
+        let result = await this.orderService.send("list", { limit: 10 }).pipe(
         //     switchMap(posts => {
         //         // console.log(posts);
         //         const userIds = Array.from(new Set(posts.map(post => post.userId)));
@@ -54,11 +54,11 @@ export class OrdersController {
         //                 }));
         //                 return postsWithAuthors;
         //             })
-        //         );
-        //     }),
+                );
         // ); // Преобразуем в Promise для использования await
-
-        // return result;
+        console.log("orders22",result);
+        
+        return result;
     }
 
     // @Get("deleteAll")

@@ -1,7 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ClientProviderOptions, ClientsModule, Transport } from '@nestjs/microservices';
 import { UserController } from './user/user.controller';
 import { UserModule } from './user/user.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -11,19 +11,24 @@ import { RmqModule } from './rmq/rmq.module';
 import { ConfigModule } from '@nestjs/config';
 import { OrderModule } from './orders/order.module';
 import { Kafka } from 'kafkajs';
+import { CreateOrderStep } from './usecases/create-order/steps/create-order.step';
+import { CreateProductStep } from './usecases/create-order/steps/create-product.step';
+
+
+const authService:ClientProviderOptions = {
+  name: 'AUTH_SERVICE',
+  transport: Transport.TCP,
+  options: {
+    host:'user-service',
+    port:4000
+  },
+}
 
 @Module({
   imports: [
     HttpModule,
     ClientsModule.register([
-      {
-        name: 'AUTH_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host:'user-service',
-          port:4000
-        },
-      },
+      authService,
       {
         name: 'AUTH_SERVICE_KAFKA',
         transport: Transport.KAFKA,
@@ -81,14 +86,15 @@ import { Kafka } from 'kafkajs';
           },
         },
       },
-      // {
-      //   name: 'ORDER_SERVICE_TCP',
-      //   transport: Transport.TCP,
-      //   options: {
-      //     host:'order-service',
-      //     port:6000
-      //   },
-      // },
+      {
+        name: 'ORDER_SERVICE_TCP',
+  
+        transport: Transport.TCP,
+        options: {
+          host:'order-service',
+          port:6000
+        },
+      },
       {
         name: 'NODE_SERVICE_TCP',
         transport: Transport.RMQ,
@@ -135,8 +141,15 @@ import { Kafka } from 'kafkajs';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-    
+   
+    {
+      provide: 'create-product-step',
+      useClass: CreateProductStep,
+    },
   ],
+  exports:[
+    // {name:"authService"}
+  ]
 })
 export class AppModule implements OnModuleInit{
   async onModuleInit() {

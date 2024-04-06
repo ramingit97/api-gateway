@@ -51,7 +51,8 @@ import { Request } from 'express';
           userInfo.status,
         );
       } 
-  
+      
+      
       request.user = userInfo;
       return true;
     }

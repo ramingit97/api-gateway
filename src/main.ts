@@ -22,6 +22,7 @@ async function bootstrap() {
   // app.useGlobalFilters(new RpxExceptionFilter())
 
   app.use(cookieParser())
+  console.log("Start api gateway")
 
 
 
