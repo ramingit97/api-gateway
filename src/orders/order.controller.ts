@@ -38,6 +38,7 @@ export class OrdersController {
         //     )
         // );
 
+
         let result = await this.orderService.send("list", { limit: 10 }).pipe(
         //     switchMap(posts => {
         //         // console.log(posts);
@@ -56,7 +57,7 @@ export class OrdersController {
         //             })
                 );
         // ); // Преобразуем в Promise для использования await
-        console.log("orders22",result);
+        console.log("orders list  22",result);
         
         return result;
     }

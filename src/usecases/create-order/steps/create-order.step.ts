@@ -14,21 +14,33 @@ import { Step } from 'src/common/step.interface';
     }
 
     async invoke(order): Promise<void> {
-        order.userId = 1;
+      order.userId = 1;
         
       const createOrder = await lastValueFrom(
-        this.orderClient.emit("orders.create",order)
+        this.orderClient.send("orders.create",order)
       )
+
+      console.log("created order from 222",createOrder);
+      
       return createOrder;
     }
 
     async withCompenstation(order): Promise<any> {
-        // const createOrder = await lastValueFrom(
-        //     this.orderClient.send("orders.cancel",{
-        //         order
-        //     })
-        // )
+      console.log("with compenstattion",order);
+      
+        const createOrder = await lastValueFrom(
+            this.orderClient.send("orders.cancel",{
+                id:order.id
+            })
+        )
         // return createOrder;
         return Promise.resolve();
-      }
+    }
+
+
+    async onModuleInit() {
+      this.orderClient.subscribeToResponseOf('orders.create');
+      this.orderClient.subscribeToResponseOf('orders.cancel');
+      await this.orderClient.connect();
+    } 
   }
