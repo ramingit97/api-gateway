@@ -13,6 +13,9 @@ import { OrderModule } from './orders/order.module';
 import { Kafka } from 'kafkajs';
 import { CreateOrderStep } from './usecases/create-order/steps/create-order.step';
 import { CreateProductStep } from './usecases/create-order/steps/create-product.step';
+import { ChatGateway } from './chat/chat.gateway';
+import { CacheModule } from '@nestjs/cache-manager';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 
 const authService:ClientProviderOptions = {
@@ -27,6 +30,8 @@ const authService:ClientProviderOptions = {
 @Module({
   imports: [
     HttpModule,
+    CacheModule.register({ isGlobal: true }),
+    EventEmitterModule.forRoot({global:true}),
     ClientsModule.register([
       authService,
       {
@@ -146,8 +151,11 @@ const authService:ClientProviderOptions = {
       provide: 'create-product-step',
       useClass: CreateProductStep,
     },
+   
+    ChatGateway,
   ],
   exports:[
+    
     // {name:"authService"}
   ]
 })

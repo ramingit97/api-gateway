@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Post } from '@nestjs/common';
+import { Controller, Get, Inject, Post, Req, Request } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ClientProxy, Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { catchError, firstValueFrom, lastValueFrom } from 'rxjs';
@@ -7,6 +7,10 @@ import { AxiosError } from 'axios';
 import { log } from 'console';
 import {readFileSync} from 'fs';
 import { randomUUID } from 'crypto';
+import { ChatGateway } from './chat/chat.gateway';
+import { Authorization } from './decorators/authorization.decorator';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Controller()
 export class AppController {
@@ -21,6 +25,7 @@ export class AppController {
     private readonly httpService: HttpService,
     @Inject("POST_SERVICE2") private readonly postService2:ClientProxy,
     @Inject("POST_SERVICE_TCP2") private readonly postService4:ClientProxy,
+    private readonly socketGateway:ChatGateway
     
     ) {}
 
@@ -200,6 +205,13 @@ export class AppController {
      return res;
   }
 
+  // @Authorization(true)
+  @Get("ramin")
+  async emitMessage(@CurrentUser() user){
+    console.log('user',user);
+      // this.socketGateway.emitMessage("rasdadsasad","sadsdsd")
+      // this.socketGateway.server.emit('chat', "ramin salam"); // Отправить сообщение всем клиентам
+  }
 
     @Get("home")
     async getHome(){
@@ -219,5 +231,8 @@ export class AppController {
         console.error('Error reading container ID:', err);
       }
     }
+
+
+    
 }
 

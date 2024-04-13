@@ -9,15 +9,22 @@ import {
   import { Reflector } from '@nestjs/core';
   import { ClientProxy } from '@nestjs/microservices';
 import { Request } from 'express';
-  
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
   @Injectable()
   export class AuthGuard implements CanActivate {
     constructor(
       private readonly reflector: Reflector,
       @Inject('AUTH_SERVICE') private readonly userServiceClient: ClientProxy,
+      @Inject(CACHE_MANAGER) private cacheService: Cache,
     ) {}
+
+
+
+    
   
     public async canActivate(context: ExecutionContext): Promise<boolean> {
+
       const secured = this.reflector.get<string[]>(
         'secured',
         context.getHandler(),
@@ -26,16 +33,29 @@ import { Request } from 'express';
       if (!secured) {
         return true;
       }
-
-      
   
       const request = context.switchToHttp().getRequest();
-
       const refresh_token = request.cookies.refresh_token;
+      const access_token = this.extractTokenFromHeader(request);
+
+
+
+      const cachedData = await this.cacheService.get(
+        access_token
+      );
       
+      if (cachedData) {
+        console.log(`Getting data from cache!`);
+        request.user = cachedData;
+        return true;
+      }
+
+
+
+
       const userInfo = await firstValueFrom(
         this.userServiceClient.send('token_decode', {
-          access_token: this.extractTokenFromHeader(request),
+          access_token,
           refresh_token
         }),
       );
@@ -52,8 +72,8 @@ import { Request } from 'express';
         );
       } 
       
-      
       request.user = userInfo;
+      await this.cacheService.set(access_token,userInfo,60*60) // 1 saat
       return true;
     }
 

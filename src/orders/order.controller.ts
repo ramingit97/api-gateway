@@ -1,31 +1,42 @@
 import { Body, Controller, Get,Inject, Post, Request} from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { ClientProxy} from '@nestjs/microservices';
 import { firstValueFrom, from, of, switchMap,map } from 'rxjs';
+import { ChatGateway } from 'src/chat/chat.gateway';
 import { Authorization } from 'src/decorators/authorization.decorator';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { CreateOrderSaga } from 'src/usecases/create-order/create-order.saga';
+import { v4 as uuidv4 } from 'uuid';
+
+
 @Controller('orders')
 export class OrdersController {
 
     constructor(
         @Inject("ORDER_SERVICE_TCP") private readonly orderService:ClientProxy,
         @Inject("AUTH_SERVICE") private readonly authService:ClientProxy,
-        @Inject('create-order-saga') private saga: CreateOrderSaga
+        @Inject('create-order-saga') private saga: CreateOrderSaga,
+        private readonly socketGateway:ChatGateway
+
 
     ){
         
     }
 
-    // @Authorization(true)
+    @Authorization(true)
     @Post("create")
-    async create(@Body() orderData,@Request() request){
-        orderData.id = 1;
-        // let result = await firstValueFrom(this.orderService.send("create",data))
-        // console.log("12312312321",result);
-        // return result;
-        await this.saga.execute(orderData);
+    async create(@Body() orderData,@Request() request,@CurrentUser() userInfo:any){
+        orderData.id = uuidv4();
+        orderData.userId = userInfo.id;
+        console.log(orderData,"orderdata from gateway")
+        this.saga.execute(orderData);
+        return orderData
+        // let result = await firstValueFrom(this.orderService.send("orders.create",orderData))
+        // console.log("result from gateway",result);
+        // return result;        
     }
 
-    // @Authorization(true)
+    @Authorization(true)
     @Get("list")
     async get(@Body() userData){
         // const result = await firstValueFrom(
@@ -61,6 +72,21 @@ export class OrdersController {
         
         return result;
     }
+
+
+    @OnEvent("orders.create.event")
+    async createPost5(data,@CurrentUser() userInfo:any){
+        let orderResult = await firstValueFrom(this.orderService.send("orders.completed",{   
+            id:data.id
+        }))
+        console.log("orderresult",orderResult);
+        this.socketGateway.emitMessage({
+            status:"completed",
+            ...orderResult
+        },data.userId)
+    }
+
+   
 
     // @Get("deleteAll")
     // async deleteAll(@Body() userData){

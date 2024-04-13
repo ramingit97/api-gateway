@@ -6,6 +6,7 @@ import { AuthGuard } from 'src/services/guards/authorization.guard';
 import { CreateOrderSaga } from 'src/usecases/create-order/create-order.saga';
 import { CreateOrderStep } from 'src/usecases/create-order/steps/create-order.step';
 import { CreateProductStep } from 'src/usecases/create-order/steps/create-product.step';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Module({
     imports:[
@@ -52,6 +53,7 @@ import { CreateProductStep } from 'src/usecases/create-order/steps/create-produc
     ],
     controllers:[OrdersController],
     providers:[
+      ChatGateway,
       {
         provide: APP_GUARD,
         useClass: AuthGuard,

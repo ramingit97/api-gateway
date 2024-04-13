@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Step } from "src/common/step.interface";
 import { CreateOrderStep } from "./steps/create-order.step";
 import { CreateProductStep } from "./steps/create-product.step";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()
 export class CreateOrderSaga {
@@ -12,7 +13,8 @@ export class CreateOrderSaga {
 
     constructor(
         @Inject("create-order-step") step1: CreateOrderStep,
-        @Inject("create-product-step") step2: CreateProductStep
+        @Inject("create-product-step") step2: CreateProductStep,
+        private eventEmitter: EventEmitter2
     ){
         this.steps = [step1,step2]
     }
@@ -35,6 +37,8 @@ export class CreateOrderSaga {
             }
         }
         console.info('Order Creation Transaction ended successfuly');
+        this.eventEmitter.emit("orders.create.event", order);
+
     }
 
 }

@@ -14,7 +14,6 @@ import { Step } from 'src/common/step.interface';
     }
 
     async invoke(order): Promise<void> {
-      order.userId = 1;
         
       const createOrder = await lastValueFrom(
         this.orderClient.send("orders.create",order)
