@@ -68,7 +68,6 @@ export class OrdersController {
         //             })
                 );
         // ); // Преобразуем в Promise для использования await
-        console.log("orders list  22",result);
         
         return result;
     }
@@ -79,7 +78,6 @@ export class OrdersController {
         let orderResult = await firstValueFrom(this.orderService.send("orders.completed",{   
             id:data.id
         }))
-        console.log("orderresult",orderResult);
         this.socketGateway.emitMessage({
             status:"completed",
             ...orderResult

@@ -45,7 +45,6 @@ import { Cache } from 'cache-manager';
       );
       
       if (cachedData) {
-        console.log(`Getting data from cache!`);
         request.user = cachedData;
         return true;
       }

@@ -14,7 +14,7 @@ export class ChatGateway implements OnGatewayConnection,OnGatewayDisconnect {
     @Inject(CACHE_MANAGER) private cacheService: Cache,
   ) {}
 
-  private userSocketMap: Map<string, string> = new Map();
+  private userSocketsMap: Map<string, Socket[]> = new Map();
 
   @WebSocketServer()
   server: Server;
@@ -23,45 +23,56 @@ export class ChatGateway implements OnGatewayConnection,OnGatewayDisconnect {
 
   @SubscribeMessage('chat')
   handleMessage(dto: any, @ConnectedSocket() client:Socket): string {
-    // if("user" in client.request){
-    //   console.log(client.request.user);
-    // }
-    
-    // console.log("payload",client)
     client.emit("chat","salam")
     // this.server.to(this.socket.id).emit("chat","salam bro necesen")
     return 'Hello world!';
   }
 
-
-  async emitMessage(payload:any,userId:string){
-    let currentSocket = this.getCurrentSocket(userId) as any;
-    if(currentSocket) this.server.to(currentSocket).emit("chat",payload)
-  }
-
-
    // it will be handled when a client connects to the server
    async handleConnection(socket: Socket) {
-      this.socket = socket;
-      const authorizationHeader = socket.request.headers['authorization'];
-      if (authorizationHeader) {
-        const accessToken = authorizationHeader.split(' ')[1]; // Получение токена из заголовка Authorization
-        let user = await this.cacheService.get(accessToken) as {id:string};
-        if(user) this.userSocketMap.set(user.id, socket.id);
-        // Здесь вы можете сделать что-то с токеном доступа
+    const user = await this.getUserId(socket);
+        if(user) {
+          const userSockets = this.userSocketsMap.get(user.id) || [];
+          this.userSocketsMap.set(user.id, [...userSockets, socket]);
       } else {
         console.log('Authorization header is missing');
-      }
     }
+  }
+  
 
-  // it will be handled when a client disconnects from the server
-  handleDisconnect(socket: Socket) {
-    console.log(`Socket disconnected: ${socket.id}`);
-    this.socket = null;
+  async handleDisconnect(socket: Socket) {
+    const user = await this.getUserId(socket);
+    if (user) {
+      const userSockets = this.userSocketsMap.get(user.id) || [];
+      const updatedSockets = userSockets.filter((s) => s.id !== socket.id);
+      this.userSocketsMap.set(user.id, updatedSockets);
+    }
+    
   }
 
 
   getCurrentSocket(userId:string){
-        return this.userSocketMap.get(userId);
+        return this.userSocketsMap.get(userId);
+  }
+
+  getUserSockets(userId: string): Socket[] {
+    return this.userSocketsMap.get(userId) || [];
+  }
+
+  async emitMessage(payload: any, userId: string) {
+    const userSockets = this.getUserSockets(userId);
+    for (const socket of userSockets) {
+      socket.emit("chat", payload);
+    }
+  }
+
+  private async getUserId(socket:Socket):Promise<{id:string}> | null{
+    const authorizationHeader = socket.request.headers['authorization'];
+    if (authorizationHeader) {
+      const accessToken = authorizationHeader.split(' ')[1]; 
+      let user = await this.cacheService.get(accessToken) as {id:string};
+      return user;
+    }
+    return null; 
   }
 }
