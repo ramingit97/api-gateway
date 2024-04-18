@@ -83,12 +83,16 @@ const authService:ClientProviderOptions = {
         transport: Transport.KAFKA,
         options: {
           client: {
-            clientId: 'auth',
+            clientId: 'consumer-orders',
             brokers: ['kafka-0:9092','kafka-1:9092'],
           },
           consumer: {
-            groupId: 'auth-consumer',
+            groupId: 'consumer-orders',
           },
+          run:{
+            autoCommit:false,
+          // autoCommitInterval:5000
+          }
         },
       },
       {

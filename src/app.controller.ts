@@ -60,25 +60,19 @@ export class AppController {
     // let res = await lastValueFrom(
       // this.postRmqService.emit("notifications",{ramin:"ramin"})
     // )
-    console.log("sttttttttttttttttttttttttttt");
-    
-    let orderRes = await lastValueFrom(
-      this.orderRmqService.emit("orders",{
-        key:'create',
-        topic:'orders',
-        headers:{eventType:"orders.create"},
-        value:{
-          order:1,name:"123123",description:"new description"
-        }})
-    )
-
-    console.log("end");
+    this.orderRmqService.emit("orders",{
+      key:'create',
+      topic:'orders',
+      headers:{eventType:"orders.create"},
+      value:{
+        order:1,name:"123123",description:"new description"
+      }})
 
   }
 
   @Get("notifications2")
   async getNotifications2(){
-    console.log('111111111111111111111111');
+    console.log('2222');
     
     // let res = await lastValueFrom(
       // this.postRmqService.emit("notifications",{ramin:"ramin"})
@@ -118,7 +112,7 @@ export class AppController {
 
   @Get("notifications4")
   async getNotifications4(){
-    console.log("1312312312312111");
+    console.log("3333");
     
     let res = await firstValueFrom(this.postService4.send("create_post1",{
       name:"Ramin",
